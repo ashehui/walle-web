@@ -9,9 +9,9 @@ $config = [
     'components' => [
 		'db' => [
             'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=172.31.253.207;dbname=deploy',
-            'username' => 'admin',
-            'password' => 'Yhhwd3306!@#$%',
+            'dsn' => 'mysql:host=127.0.0.1;dbname=walle-web',
+            'username' => 'root',
+            'password' => '',
             'charset' => 'utf8'
         ],
         'session' => [
