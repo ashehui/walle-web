@@ -7,9 +7,12 @@ $config = [
     'controllerNamespace' => 'app\controllers',
     'defaultRoute'        => 'task/index',
     'components' => [
-        'db' => [
-            'class'     => 'yii\db\Connection',
-            'charset'   => 'utf8',
+		'db' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => 'mysql:host=172.31.253.207;dbname=deploy',
+            'username' => 'admin',
+            'password' => 'Yhhwd3306!@#$%',
+            'charset' => 'utf8'
         ],
         'session' => [
             'class'        => 'yii\web\DbSession',

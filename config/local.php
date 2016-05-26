@@ -11,11 +11,6 @@ putenv('LC_ALL=zh_CN.UTF-8');
 
 return [
     'components' => [
-        'db' => [
-            'dsn'       => 'mysql:host=127.0.0.1;dbname=walle',
-            'username'  => 'root',
-            'password'  => '',
-        ],
         'mail' => [
             'transport' => [
                 'host'       => 'smtp.huamanshu.com',     # smtp 发件地址
