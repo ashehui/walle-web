@@ -11,6 +11,7 @@ namespace app\components;
 
 use app\models\User;
 use yii;
+use yii\helpers\Url;
 
 class GlobalHelper {
 
@@ -24,7 +25,7 @@ class GlobalHelper {
     public static function sendMail($user, $default = null) {
         $params = Yii::$app->params;
         return Yii::$app->mail->compose()
-            ->setFrom([$params['support.email'] => $params['support.name']])
+            ->setFrom(Yii::$app->mail->messageConfig['from'])
             ->setTo($user->email)
             ->setSubject('Complete registration with ' . Yii::$app->name)
             ->send();
@@ -38,12 +39,34 @@ class GlobalHelper {
      * @return array
      */
     public static function str2arr($string, $delimiter = PHP_EOL) {
+
         $items = explode($delimiter, $string);
+
         foreach ($items as $key => &$item) {
+
+            // 查找 # 的位置
+            $pos = strpos($item, '#');
+
+            if ($pos === 0) {
+                // # 开头, 整行注释
+                unset($items[$key]);
+                // 直接到下一个
+                continue;
+            }
+
+            if ($pos > 0) {
+                // # 在中间, 后面一段注释
+                $item = substr($item, 0, $pos);
+            }
+
             $item = trim($item);
-            if (empty($item)) unset($items[$key]);
+            if (empty($item)) {
+                unset($items[$key]);
+            }
+
         }
-        return $items;;
+
+        return $items;
     }
 
     /**
@@ -66,7 +89,7 @@ class GlobalHelper {
      * @return string
      */
     public static function formatAvatar($pic) {
-        return rtrim(User::AVATAR_ROOT, '/') . '/' . $pic;
+        return rtrim(Url::to('@web' . User::AVATAR_ROOT), '/') . '/' . $pic;
     }
 
     /**
@@ -76,8 +99,9 @@ class GlobalHelper {
      */
     public static function isValidAdmin() {
         return \Yii::$app->user
-            && \Yii::$app->user->identity->role == \app\models\User::ROLE_ADMIN
-            && \Yii::$app->user->identity->status == \app\models\User::STATUS_ACTIVE;
+            && \Yii::$app->user->identity->role == User::ROLE_ADMIN
+            && \Yii::$app->user->identity->is_email_verified == User::MAIL_ACTIVE
+            && \Yii::$app->user->identity->status == User::STATUS_ADMIN_ACTIVE;
     }
 
 }

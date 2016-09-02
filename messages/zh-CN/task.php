@@ -30,7 +30,12 @@ return [
     'all branches' => '查看所有分支',
     'select branch' => '版本选取',
     'submit title' => '上线单标题',
-    'file list placeholder' => '1.上线全量文件：* 2.增量上线指定文件：file_name 3.增量上线指定文件的指定版本：file_name commit_id',
+    'file list placeholder' => '1.上线指定目录：dir_name<br />2.上线指定文件：file_name<br />3.通配符 file*',
     'file list' => '文件列表',
     'diff tip' => '自动获取该分支/tag下的两提交历史间的文件',
+    'file transmission mode' => '全量/增量:',
+    'file transmission mode full' => '全量上线',
+    'file transmission mode part' => '指定文件',
+    'file transmission mode full tip' => '全量上线所有文件, 删除不在代码仓库中的文件',
+    'file transmission mode part tip' => '指定文件列表, 只发布指定的文件和目录',
 ];

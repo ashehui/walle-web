@@ -4,6 +4,8 @@
  */
 $this->title = yii::t('user', 'profile title');
 use \app\components\GlobalHelper;
+use app\models\User;
+use yii\helpers\Url;
 
 ?>
 <div class="tab-content no-border padding-24">
@@ -69,7 +71,7 @@ use \app\components\GlobalHelper;
                     <div class="profile-info-value">
                         <span>
                             <?= \Yii::t('w', 'user_role_' . $user->role) ?>
-                            <?= $user->status == \app\models\User::STATUS_INACTIVE ? yii::t('user', 'inactive') : '' ?>
+                            <?= $user->role == User::ROLE_ADMIN && $user->status != \app\models\User::STATUS_ADMIN_ACTIVE ? yii::t('user', 'un-auth') : '' ?>
                         </span>
                     </div>
                 </div>
@@ -89,9 +91,9 @@ use \app\components\GlobalHelper;
 
     <div class="space-20"></div>
 </div>
-<script src="/dist/js/x-editable/bootstrap-editable.min.js"></script>
-<script src="/dist/js/x-editable/ace-editable.min.js"></script>
-<script src="/dist/js/jquery.gritter.min.js"></script>
+<script src="<?= Url::to('@web/dist/js/x-editable/bootstrap-editable.min.js') ?>"></script>
+<script src="<?= Url::to('@web/dist/js/x-editable/ace-editable.min.js') ?>"></script>
+<script src="<?= Url::to('@web/dist/js/jquery.gritter.min.js') ?>"></script>
 <script>
     jQuery(function($) {
 
@@ -218,7 +220,7 @@ use \app\components\GlobalHelper;
                         fd.append('_csrf', '<?= \Yii::$app->request->getCsrfToken(); ?>');
 
                         deferred = $.ajax({
-                            url: '/user/avatar/',
+                            url: '<?= Url::to('@web/user/avatar/') ?>',
                             type: 'POST',
                             processData: false,
                             contentType: false,

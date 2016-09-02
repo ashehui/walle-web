@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Expression;
+use app\components\GlobalHelper;
 
 /**
  * This is the model class for table "task".
@@ -29,38 +30,57 @@ class Task extends \yii\db\ActiveRecord
      * 普通上线任务
      */
     const ACTION_ONLINE = 0;
+
     /**
      * 回滚任务
      */
     const ACTION_ROLLBACK = 1;
+
     /**
      * 任务新提交
      */
     const STATUS_SUBMIT = 0;
+
     /**
      * 任务通过
      */
     const STATUS_PASS   = 1;
+
     /**
      * 任务拒绝
      */
     const STATUS_REFUSE = 2;
+
     /**
      * 任务上线完成
      */
     const STATUS_DONE   = 3;
+
     /**
      * 任务上线失败
      */
     const STATUS_FAILED = 4;
+
     /**
      * 可回滚
      */
     const ROLLBACK_TRUE  = 1;
+
     /**
      * 不可回滚
      */
     const ROLLBACK_FALSE = 0;
+
+    /**
+     * 上线模式: 全量发布
+     */
+    const FILE_TRANSMISSION_MODE_FULL = 1;
+
+    /**
+     * 上线模式: 指定文件列表
+     */
+    const FILE_TRANSMISSION_MODE_PART = 2;
+
     /**
      * @inheritdoc
      */
@@ -91,7 +111,7 @@ class Task extends \yii\db\ActiveRecord
     {
         return [
             [['user_id', 'project_id', 'status', 'title'], 'required'],
-            [['user_id', 'project_id', 'action', 'status'], 'integer'],
+            [['user_id', 'project_id', 'action', 'status', 'file_transmission_mode'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['file_list'], 'string'],
             [['title', 'link_id', 'ex_link_id', 'commit_id', 'branch'], 'string', 'max' => 100],
@@ -144,4 +164,25 @@ class Task extends \yii\db\ActiveRecord
     public function getProject() {
         return $this->hasOne(Project::className(), ['id' => 'project_id']);
     }
+
+    /**
+     * 获取要发布的文件列表
+     *
+     * @return array|string
+     */
+    public function getCommandFiles() {
+
+        if ($this->file_transmission_mode == static::FILE_TRANSMISSION_MODE_FULL) {
+            return '.';
+        } elseif ($this->file_transmission_mode == static::FILE_TRANSMISSION_MODE_PART && $this->file_list) {
+
+            $fileList = GlobalHelper::str2arr($this->file_list);
+            $commandFiles = join(' ', $fileList);
+
+            return trim($commandFiles);
+        } else {
+            throw new \InvalidArgumentException('file list empty');
+        }
+    }
+
 }

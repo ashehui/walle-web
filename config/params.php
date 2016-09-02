@@ -3,12 +3,8 @@
  * 亲，为方便大家，已经把必须修改为自己配置的选项已经带上*****了
  * 此配置为测试配置，如果你不想消息泄露，请尽快修改为自己的邮箱smtp
  */
-return [
-    // ******必须要与config/web.php 中mail模块的username一致*****
-    'support.email' => 'service@huamanshu.com',
-    // 显示发件人的名字，可以随意
-    'support.name' => 'service',
 
+return [
     'user.passwordResetTokenExpire' => 3600,
     'user.emailConfirmationTokenExpire' => 43200, // 5 days有效
 
@@ -18,7 +14,9 @@ return [
     ],
 
     // *******操作日志目录*******
-    'log.dir' => '/tmp/walle/',
+    'log.dir' => isset($_ENV['WALLE_LOG_PATH']) ? $_ENV['WALLE_LOG_PATH'] : '/tmp/walle/',
+    // *******Ansible Hosts 主机列表目录*******
+    'ansible_hosts.dir' => isset($_ENV['WALLE_ANSIBLE_HOSTS_DIR']) ? $_ENV['WALLE_ANSIBLE_HOSTS_DIR'] : realpath(__DIR__ . '/../runtime') . '/ansible_hosts/',
     // *******指定公司邮箱后缀*******
     'mail-suffix' => [
         '*', # 支持多个

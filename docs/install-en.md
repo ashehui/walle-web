@@ -51,7 +51,14 @@ composer install --prefer-dist --no-dev --optimize-autoloader -vvvv
 ------------
 ```
 cd walle-web
-./yii run/setup # yes
+./yii walle/setup # yes
+```
+
+Upgrade Walle
+-------------
+```
+cd walle-web
+./yii walle/upgrade
 ```
 
 

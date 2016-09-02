@@ -8,8 +8,7 @@
  * *****************************************************************/
 namespace app\components;
 
-
-abstract class Command {
+class Command {
 
     protected static $LOGDIR = '';
     /**
@@ -55,7 +54,7 @@ abstract class Command {
      * @param $command
      * @return bool|int true 成功，false 失败
      */
-    final protected function runLocalCommand($command) {
+    final public function runLocalCommand($command) {
         $command = trim($command);
         $this->log('---------------------------------');
         $this->log('---- Executing: $ ' . $command);
@@ -81,28 +80,42 @@ abstract class Command {
     /**
      * 执行远程目标机器命令
      *
-     * @param $command
+     * @param string  $command
+     * @param integer $delay 每台机器延迟执行post_release任务间隔, 不推荐使用, 仅当业务无法平滑重启时使用
      * @return bool
      */
-    final protected function runRemoteCommand($command) {
+    final public function runRemoteCommand($command, $delay = 0) {
         $this->log = '';
-        $needTTY = ' -T ';
+        $needTTY = '-T';
 
         foreach (GlobalHelper::str2arr($this->getConfig()->hosts) as $remoteHost) {
-            $localCommand = 'ssh ' . $needTTY . ' -p ' . $this->getHostPort($remoteHost)
-                . ' -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no '
-                . $this->getConfig()->release_user . '@'
-                . $this->getHostName($remoteHost);
-            $remoteCommand = str_replace('"', '\\"', trim($command));
-            $localCommand .= ' " ' . $remoteCommand . ' " ';
-            static::log('Run remote command ' . $remoteCommand);
+
+            $localCommand = sprintf('ssh %s -p %d -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o CheckHostIP=false %s@%s %s',
+                $needTTY,
+                $this->getHostPort($remoteHost),
+                escapeshellarg($this->getConfig()->release_user),
+                escapeshellarg($this->getHostName($remoteHost)),
+                escapeshellarg($command)
+            );
+
+            if ($delay > 0) {
+                // 每台机器延迟执行post_release任务间隔, 不推荐使用, 仅当业务无法平滑重启时使用
+                static::log(sprintf('Sleep: %d s', $delay));
+                sleep($delay);
+            }
+
+            static::log('Run remote command ' . $command);
 
             $log = $this->log;
             $this->status = $this->runLocalCommand($localCommand);
 
             $this->log = $log . (($log ? PHP_EOL : '') . $remoteHost . ' : ' . $this->log);
-            if (!$this->status) return false;
+            if (!$this->status) {
+                return false;
+            }
+
         }
+
         return true;
     }
 
@@ -206,6 +219,5 @@ abstract class Command {
         $hostInfo = explode(':', $host);
         return !empty($hostInfo[1]) ? $hostInfo[1] : $default;
     }
-
 
 }

@@ -8,8 +8,8 @@ use app\components\Controller;
 use app\components\GlobalHelper;
 use app\models\User;
 use app\models\forms\UserResetPasswordForm;
-use yii\base\InvalidParamException;
-
+use app\models\forms\AddUserForm;
+use yii\data\Pagination;
 
 class UserController extends Controller {
 
@@ -26,19 +26,20 @@ class UserController extends Controller {
     public function actionAvatar() {
         $fileParts = pathinfo($_FILES['avatar']['name']);
         if ($_FILES['avatar']['error']) {
-            $this->renderJson([], -1, yii::t('user', 'upload failed'));
+            $this->renderJson([], self::FAIL, yii::t('user', 'upload failed'));
         }
         if ($_FILES['avatar']['size'] > static::AVATAR_SIZE) {
-            $this->renderJson([], -1, yii::t('user', 'attached\'s size too large'));
+            $this->renderJson([], self::FAIL, yii::t('user', 'attached\'s size too large'));
         }
         if (!in_array(strtolower($fileParts['extension']), \Yii::$app->params['user.avatar.extension'])) {
-            $this->renderJson([], -1, yii::t('user', 'type not allow', [
+            $this->renderJson([], self::FAIL, yii::t('user', 'type not allow', [
                 'types' => join(', ', \Yii::$app->params['user.avatar.extension'])
             ]));
         }
         $tempFile   = $_FILES['avatar']['tmp_name'];
         $baseName   = sprintf('%s-%d.%s', date("YmdHis", time()), rand(10, 99), $fileParts['extension']);
-        $newFile    = GlobalHelper::formatAvatar($baseName);
+        $newFile    = User::AVATAR_ROOT . $baseName;
+        $urlFile    = GlobalHelper::formatAvatar($baseName);
         $targetFile = sprintf("%s/web/%s", rtrim(\Yii::$app->basePath, '/'),  ltrim($newFile, '/'));
         $ret = move_uploaded_file($tempFile, $targetFile);
         if ($ret) {
@@ -47,7 +48,7 @@ class UserController extends Controller {
             $ret = $user->save();
         }
 
-        $this->renderJson(['url' => $newFile], !$ret, $ret ?: yii::t('user', 'update avatar failed'));
+        $this->renderJson(['url' => $urlFile], !$ret, $ret ?: yii::t('user', 'update avatar failed'));
     }
 
     public function actionAudit() {
@@ -62,6 +63,25 @@ class UserController extends Controller {
 
 
     /**
+     * 用户管理
+     */
+    public function actionList($page = 1, $size = 10) {
+        $userList = User::find()->orderBy('id desc');
+        $kw = \Yii::$app->request->post('kw');
+        if ($kw) {
+            $userList->andFilterWhere(['like', "username", $kw])
+                ->orFilterWhere(['like', "email", $kw]);
+        }
+        $pages = new Pagination(['totalCount' => $userList->count(), 'pageSize' => $size]);
+        $userList = $userList->offset(($page - 1) * $size)->limit($size)->asArray()->all();
+
+        return $this->render('list', [
+            'userList' => $userList,
+            'pages' => $pages,
+        ]);
+    }
+
+    /**
      * 删除项目管理员
      *
      * @return string
@@ -70,11 +90,6 @@ class UserController extends Controller {
     public function actionDeleteAdmin($id) {
         $this->validateAdmin();
         $user = $this->findModel($id);
-
-        if ($user->role != User::ROLE_ADMIN || $user->is_email_verified != 1
-            || $user->status != User::STATUS_INACTIVE) {
-            throw new \Exception(yii::t('user', 'cant\'t remove active manager'));
-        }
 
         if (!$user->delete()) throw new \Exception(yii::t('w', 'delete failed'));
         $this->renderJson([]);
@@ -90,11 +105,7 @@ class UserController extends Controller {
         $this->validateAdmin();
         $user = $this->findModel($id);
 
-        if ($user->role != User::ROLE_ADMIN || $user->is_email_verified != 1
-            || $user->status != User::STATUS_INACTIVE) {
-            throw new \Exception(yii::t('user', 'only pass inactive manager'));
-        }
-        $user->status = User::STATUS_ACTIVE;
+        $user->status = User::STATUS_ADMIN_ACTIVE;
         if (!$user->update()) throw new \Exception(yii::t('w', 'update failed'));
         $this->renderJson([]);
     }
@@ -132,4 +143,115 @@ class UserController extends Controller {
         }
     }
 
+    /**
+     * 设置为管理员
+     *
+     * @return json
+     */
+    public function actionToAdmin($uid) {
+        $this->validateAdmin();
+        if ($uid) {
+            User::updateAll(['role' => User::ROLE_ADMIN], ['id' => $uid]);
+        }
+
+        $this->renderJson([], self::SUCCESS);
+    }
+
+    /**
+     * 设置为普通用户
+     *
+     * @return  json
+     */
+    public function actionToDev($uid) {
+        $this->validateAdmin();
+        if ($uid) {
+            User::updateAll(['role' => User::ROLE_DEV], ['id' => $uid]);
+        }
+
+        $this->renderJson([], self::SUCCESS);
+    }
+
+    /**
+     * 帐号冻结
+     *
+     * @return  json
+     */
+    public function actionBan($uid) {
+        $this->validateAdmin();
+        if ($uid) {
+            User::updateAll(['status' => User::STATUS_INVALID], ['id' => $uid]);
+        }
+
+        $this->renderJson([], self::SUCCESS);
+    }
+
+    /**
+     * 帐号解冻
+     *
+     * @return  json
+     */
+    public function actionUnBan($uid) {
+        $this->validateAdmin();
+        if ($uid) {
+            User::updateAll(['status' => User::STATUS_ACTIVE], ['id' => $uid]);
+        }
+
+        $this->renderJson([], self::SUCCESS);
+    }
+
+    /**
+     * 删除帐号
+     *
+     * @return json
+     */
+    public function actionDelete($uid) {
+        $this->validateAdmin();
+        $user = User::findOne($uid);
+        if ($user) {
+            $user->delete();
+        }
+
+        $this->renderJson([], self::SUCCESS);
+    }
+
+    /**
+     * 修改真实姓名
+     *
+     * @return   json
+     */
+    public function actionRename($realName, $uid) {
+        $this->validateAdmin();
+        if ($realName && $uid) {
+            $res = User::updateAll(['realname' => $realName], ['id' => $uid]);
+            $this->renderJson([], $res ? self::SUCCESS : self::FAIL, $res ? '' : Yii::t('w', 'update failed'));
+        }
+        $this->renderJson([], self::FAIL, Yii::t('w', 'update failed'));
+    }
+
+    /**
+     * 新增用户
+     */
+    public function actionAdd() {
+        $this->validateAdmin();
+        $model = new AddUserForm();
+
+        if ($model->load(Yii::$app->request->post()) ) {
+            if ($user = $model->signup()) {
+                Yii::$app->mail->compose('accountNotice', ['user' => $user])
+                    ->setFrom(Yii::$app->mail->messageConfig['from'])
+                    ->setTo($user->email)
+                    ->setSubject('瓦力平台 - 帐号已开通')
+                    ->send();
+
+                return $this->redirect('@web/user/list');
+            }
+            else {
+                throw new \Exception(yii::t('user', 'email exists'));
+            }
+        }
+
+        return $this->render('add', [
+            'model' => $model
+        ]);
+    }
 }

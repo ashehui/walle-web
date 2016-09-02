@@ -8,11 +8,18 @@
  * *****************************************************************/
 namespace app\components;
 
-
 use app\models\Project;
+use app\models\Task as TaskModel;
 
 class Git extends Command {
 
+    /**
+     * 更新仓库
+     *
+     * @param string $branch
+     * @param string $gitDir
+     * @return bool|int
+     */
     public function updateRepo($branch = 'master', $gitDir = null) {
         $gitDir = $gitDir ?: Project::getDeployFromDir();
         $dotGit = rtrim($gitDir, '/') . '/.git';
@@ -39,10 +46,10 @@ class Git extends Command {
     /**
      * 更新到指定commit版本
      *
-     * @param string $commit
+     * @param TaskModel $task
      * @return bool
      */
-    public function updateToVersion($task) {
+    public function updateToVersion(TaskModel $task) {
         // 先更新
         $destination = Project::getDeployWorkspace($task->link_id);
         $this->updateRepo($task->branch, $destination);
@@ -60,9 +67,10 @@ class Git extends Command {
      */
     public function getBranchList() {
         $destination = Project::getDeployFromDir();
-        // 先更新，其实没有必要更新
-        ///$this->updateRepo('master', $destination);
+        // 应该先更新，不然在remote git删除当前选中的分支后，获取分支列表会失败
+        $this->updateRepo('master', $destination);
         $cmd[] = sprintf('cd %s ', $destination);
+        $cmd[] = '/usr/bin/env git fetch -p';
         $cmd[] = '/usr/bin/env git pull -a';
         $cmd[] = '/usr/bin/env git branch -a';
         $command = join(' && ', $cmd);
@@ -95,7 +103,10 @@ class Git extends Command {
     /**
      * 获取提交历史
      *
+     * @param string $branch
+     * @param int $count
      * @return array
+     * @throws \Exception
      */
     public function getCommitList($branch = 'master', $count = 20) {
         // 先更新
@@ -111,7 +122,7 @@ class Git extends Command {
 
         $history = [];
         // 总有一些同学没有团队协作意识，不设置好编码：(
-        $log = GlobalHelper::convert2Utf8($this->getExeLog());
+        $log = htmlspecialchars(GlobalHelper::convert2Utf8($this->getExeLog()));
         $list = explode(PHP_EOL, $log);
         foreach ($list as $item) {
             $commitId = substr($item, 0, strpos($item, '-') - 1);
@@ -150,5 +161,5 @@ class Git extends Command {
         }
         return $history;
     }
-
+    
 }

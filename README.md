@@ -1,4 +1,4 @@
-![](https://raw.github.com/meolu/walle-web/master/screenshots/logo.jpg)
+![](https://raw.github.com/meolu/walle-web/master/docs/logo.jpg)
 
 Walle - A Deployment Tool
 =========================
@@ -9,9 +9,9 @@ Walle - A Deployment Tool
 A web deployment tool, Easy for configuration, Fully functional, Smooth interface, Out of the box.
 support git/svn Version control system, no matter what language you are, php/java/ruby/python, just as jenkins. you can deploy the code or output to multiple servers easily by walle.
 
-[Home Page](http://www.huamanshu.com/walle-en.html) | [官方主页](http://www.huamanshu.com/walle.html) | [中文说明](https://github.com/meolu/walle-web/blob/master/docs/README-zh.md) | [文档手册](http://doc.huamanshu.com/%E7%93%A6%E5%8A%9B).
+[Home Page](https://www.walle-web.io) | [官方主页](https://www.walle-web.io) | [中文说明](https://github.com/meolu/walle-web/blob/master/docs/README-zh.md) | [文档手册](https://www.walle-web.io/docs/).
 
-Now, there are more than ten companies hosted walle for deployment, star walle if you like : )
+Now, there are more than hundreds of companies hosted walle for deployment, star walle if you like : )
 
 * Support git/svn Version control system.
 * User signup by admin/develop identity.
@@ -26,6 +26,7 @@ Now, there are more than ten companies hosted walle for deployment, star walle i
 * Task of pre-release（e.g: stop service）.
 * Task of post-release（e.g: restart service）.
 * Check up file md5.
+* Multi-process multi-server file transfer (Ansible).
 
 
 Requirements
@@ -34,6 +35,7 @@ Requirements
 * Bash(git、ssh)
 * LNMP/LAMP(php5.4+)
 * Composer
+* Ansible(Optional)
 
 That's all. It's base package of PHP environment!
 
@@ -45,7 +47,7 @@ git clone git@github.com:meolu/walle-web.git
 cd walle-web
 vi config/web.php # set up module db mysql connection info
 composer install  # error cause by bower-asset, install：composer global require "fxp/composer-asset-plugin:*"
-./yii run/setup   # init walle
+./yii walle/setup # init walle
 ```
 Or [The Most Detailed Installation Guide](https://github.com/meolu/walle-web/blob/master/docs/install-en.md), any questions refer to [FAQ](https://github.com/meolu/walle-web/blob/master/docs/faq-en.md)
 
@@ -77,16 +79,17 @@ you would like to adjust some params to make walle suited for your company.
     ```php
     vi config/local.php
 
-    'host'       => 'smtp.huamanshu.com',    # smtp host
-    'username'   => 'service@huamanshu.com', # smtp username
-    'password'   => 'password',              # smtp password
-    'port'       => 25,                      # smtp port
-    'encryption' => 'tls',                   # smtp protocol
-
-
-    vi config/params.php
-
-    'support.email' => 'service@huamanshu.com', // the same with username of mail module in config/web.php
+    'transport' => [
+            'host'       => 'smtp.huamanshu.com',
+            'username'   => 'service@huamanshu.com',
+            'password'   => 'K84erUuxg1bHqrfD',
+            'port'       => 25,
+            'encryption' => 'tls',
+        ],
+        'messageConfig' => [
+            'charset' => 'UTF-8',
+            'from'    => ['service@huamanshu.com' => '花满树出品'],  // the same with username of mail module in config/web.php
+        ],
     ```
 
 * Configure the path for log
@@ -120,36 +123,35 @@ To Do List
 Update
 -----------------
 ```
-git pull
-./yii migrate # update db
+./yii walle/upgrade    # upgrade walle
 ```
 
 
 Architecture
 ------------
 #### git/svn, user, host, servers
-![](https://raw.github.com/meolu/walle-web/master/screenshots/walle-flow-relation-en.png)
+![](https://raw.github.com/meolu/docs/master/walle-web.io/docs/en/static/walle-flow-relation-en.png)
 
 #### deployment flow
-![](https://raw.github.com/meolu/walle-web/master/screenshots/walle-flow-en.png)
+![](https://raw.github.com/meolu/docs/master/walle-web.io/docs/en/static/walle-flow-en.png)
 
 Screenshots
 -----------
 
 #### project config
-![](https://raw.github.com/meolu/walle-web/master/screenshots/walle-config-edit-en.jpg)
+![](https://raw.github.com/meolu/docs/master/walle-web.io/docs/en/static/walle-config-edit-en.jpg)
 
 #### sumbit a task
-![](https://raw.github.com/meolu/walle-web/master/screenshots/walle-submit-en.jpg)
+![](https://raw.github.com/meolu/docs/master/walle-web.io/docs/en/static/walle-submit-en.jpg)
 
 #### list of task
-![](https://raw.github.com/meolu/walle-web/master/screenshots/walle-dev-list-en.jpg)
+![](https://raw.github.com/meolu/docs/master/walle-web.io/docs/en/static/walle-dev-list-en.jpg)
 
 #### demo show
-![](https://raw.github.com/meolu/walle-web/master/screenshots/walle-en.gif)
+![](https://raw.github.com/meolu/docs/master/walle-web.io/docs/en/static/walle-en.gif)
 
 ## CHANGELOG
-[CHANGELOG](https://github.com/meolu/walle-web/blob/master/docs/CHANGELOG.md)
+[CHANGELOG](https://github.com/meolu/walle-web/releases)
 
 
 Discussing

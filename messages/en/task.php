@@ -30,7 +30,12 @@ return [
     'all branches' => 'View All branches',
     'select branch' => 'Select Branch',
     'submit title' => 'Title',
-    'file list placeholder' => '1.Distribute all files of project：* 2.Distribute specified file：file_name 3.Distribute specified file of specified version：file_name commit_id',
+    'file list placeholder' => '1.Distribute specified directory：dir_name<br />2.Distribute specified file：file_name<br />3.Distribute specified file：file*',
     'file list' => 'File list',
     'diff tip' => 'Auto get the diff files between two commit id of branch/tag',
+    'file transmission mode' => 'full/part:',
+    'file transmission mode full' => 'Deploy all files',
+    'file transmission mode part' => 'Deploy specified files',
+    'file transmission mode full tip' => 'Deploy all files, and delete the files not in the repository',
+    'file transmission mode part tip' => 'Deploy distribute specified files',
 ];

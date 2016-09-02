@@ -8,10 +8,9 @@
  * *****************************************************************/
 namespace app\components;
 
-
 use app\models\Project;
 
-class Task extends Command {
+class Task extends Ansible {
 
     /**
      * pre-deploy部署代码前置触发任务
@@ -24,7 +23,7 @@ class Task extends Command {
         if (empty($tasks)) return true;
 
         // 本地可能要做一些依赖环境变量的命令操作
-        $cmd = ['source /etc/profile'];
+        $cmd = ['. /etc/profile'];
         $workspace = rtrim(Project::getDeployWorkspace($version), '/');
         $pattern = [
             '#{WORKSPACE}#',
@@ -42,7 +41,6 @@ class Task extends Command {
         return $this->runLocalCommand($command);
     }
 
-
     /**
      * post-deploy部署代码后置触发任务
      * git代码检出之后，可能做一些调整处理，如vendor拷贝，配置环境适配（mv config-test.php config.php）
@@ -54,7 +52,7 @@ class Task extends Command {
         if (empty($tasks)) return true;
 
         // 本地可能要做一些依赖环境变量的命令操作
-        $cmd = ['source /etc/profile'];
+        $cmd = ['. /etc/profile'];
         $workspace = rtrim(Project::getDeployWorkspace($version), '/');
         $pattern = [
             '#{WORKSPACE}#',
@@ -76,11 +74,21 @@ class Task extends Command {
      * 设置了版本保留数量，超出了设定值，则删除老版本
      */
     public function cleanUpReleasesVersion() {
+
+        $ansibleStatus = Project::getAnsibleStatus();
+
         $cmd[] = sprintf('cd %s', Project::getReleaseVersionDir());
-        $cmd[] = 'ls -1|sort -r|awk \'FNR > ' . $this->config->keep_version_num . ' {printf("rm -rf %s\n", \$0);}\' | bash ';
+        $cmd[] = sprintf('rm -f %s/*.tar.gz', rtrim(Project::getReleaseVersionDir(), '/'));
+        $cmd[] = sprintf('ls -1 | sort -r | awk \'FNR > %d  {printf("rm -rf %%s\n", $0);}\' | bash', $this->config->keep_version_num);
 
         $command = join(' && ', $cmd);
-        return $this->runRemoteCommand($command);
+
+        if ($ansibleStatus) {
+            // ansible 并发执行远程命令
+            return $this->runRemoteCommandByAnsibleShell($command);
+        } else {
+            return $this->runRemoteCommand($command);
+        }
     }
 
     /**
@@ -95,7 +103,7 @@ class Task extends Command {
         if (empty($tasks)) return '';
 
         // 可能要做一些依赖环境变量的命令操作
-        $cmd = ['source /etc/profile'];
+        $cmd = ['. /etc/profile'];
         $workspace = Project::getTargetWorkspace();
         $version   = Project::getReleaseVersionDir($version);
         $pattern = [
@@ -119,12 +127,21 @@ class Task extends Command {
      * 执行远程服务器任务集合
      * 对于目标机器更多的时候是一台机器完成一组命令，而不是每条命令逐台机器执行
      *
-     * @param $tasks
+     * @param array   $tasks
+     * @param integer $delay 每台机器延迟执行post_release任务间隔, 不推荐使用, 仅当业务无法平滑重启时使用
      * @return mixed
      */
-    public function runRemoteTaskCommandPackage($tasks) {
+    public function runRemoteTaskCommandPackage($tasks, $delay = 0) {
+
         $task = join(' && ', $tasks);
-        return $this->runRemoteCommand($task);
+
+        if (Project::getAnsibleStatus() && !$delay) {
+            // ansible 并发执行远程命令
+            return $this->runRemoteCommandByAnsibleShell($task);
+        } else {
+            return $this->runRemoteCommand($task, $delay);
+        }
+
     }
 
 }

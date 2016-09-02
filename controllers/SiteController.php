@@ -4,8 +4,6 @@ namespace app\controllers;
 
 use Yii;
 use app\components\Controller;
-use yii\filters\AccessControl;
-use yii\filters\VerbFilter;
 use app\models\User;
 use app\models\forms\LoginForm;
 use app\models\forms\PasswordResetRequestForm;
@@ -62,14 +60,10 @@ class SiteController extends Controller
     public function actionSignup() {
         $user = new User(['scenario' => 'signup']);
         if ($user->load(Yii::$app->request->post())) {
-            // 项目管理员需要审核
-            if ($user->role == User::ROLE_ADMIN) {
-                $user->status = User::STATUS_INACTIVE;
-            }
+            $user->status = User::STATUS_ACTIVE;
             if ($user->save()) {
-                $params = Yii::$app->params;
                 Yii::$app->mail->compose('confirmEmail', ['user' => $user])
-                    ->setFrom([$params['support.email'] => $params['support.name']])
+                    ->setFrom(Yii::$app->mail->messageConfig['from'])
                     ->setTo($user->email)
                     ->setSubject('瓦力平台 - ' . $user->realname)
                     ->send();
@@ -110,7 +104,6 @@ class SiteController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if ($model->sendEmail()) {
                 Yii::$app->getSession()->setFlash('success', 'Check your email for further instructions.');
-
                 return $this->goHome();
             } else {
                 Yii::$app->getSession()->setFlash('error', 'Sorry, we are unable to reset password for email provided.');
