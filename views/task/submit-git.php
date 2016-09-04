@@ -7,9 +7,6 @@ use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use app\models\Project;
 use app\models\Task;
-
-//yii\gii\GiiAsset::register($this);
-
 ?>
 <div class="box">
     <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
