@@ -38,14 +38,14 @@ use app\models\Task;
               </label>
               <div id="transmission-full-ctl" class="radio" style="display: inline;" data-rel="tooltip" data-title="<?= yii::t('task', 'file transmission mode full tip') ?>" data-placement="right">
                   <label>
-                      <input name="Task[file_transmission_mode]" value="<?= Task::FILE_TRANSMISSION_MODE_FULL ?>" checked="checked" type="radio" class="ace">
+                      <input name="Task[file_transmission_mode]" value="<?= Task::FILE_TRANSMISSION_MODE_FULL ?>" type="radio" class="ace">
                       <span class="lbl"><?= yii::t('task', 'file transmission mode full') ?></span>
                   </label>
               </div>
 
               <div id="transmission-part-ctl" class="radio" style="display: inline;" data-rel="tooltip" data-title="<?= yii::t('task', 'file transmission mode part tip') ?>" data-placement="right">
                   <label>
-                      <input name="Task[file_transmission_mode]" value="<?= Task::FILE_TRANSMISSION_MODE_PART ?>" type="radio" class="ace">
+                      <input name="Task[file_transmission_mode]" value="<?= Task::FILE_TRANSMISSION_MODE_PART ?>" type="radio" checked="checked" class="ace">
                       <span class="lbl"><?= yii::t('task', 'file transmission mode part') ?></span>
                   </label>
               </div>
