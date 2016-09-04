@@ -339,5 +339,38 @@ class Folder extends Ansible {
         return $this->runLocalCommand($command);
     }
 
+
+    public function getFiles($path) {
+        $rootPath = Project::getDeployFromDir();
+        if (!$sourcePath = realpath("$rootPath/$path")) {
+            return [];
+        }
+
+        if (substr($sourcePath, 0, strlen($rootPath)) != $rootPath) {
+            $sourcePath = $rootPath;
+        }
+
+        $cmd = "find {$sourcePath} -maxdepth 1 ! -path {$sourcePath} ! -path \"*.git*\" ! -path \"*.svn*\"";
+
+        $excludes = explode("\n", $this->config->excludes);
+        foreach ($excludes as $excludePath) {
+            $excludePath = trim($excludePath);
+            $cmd .= " ! -path \"*$excludePath\"";
+        }
+
+        $result = $this->runLocalCommand($cmd);
+
+        $output = explode(PHP_EOL, $this->getExeLog());
+        $files = [];
+        foreach($output as $line) {
+            $files[$line] = [
+                'file' => $line
+            ];
+        }
+
+        return $files;
+    }
+
+
 }
 

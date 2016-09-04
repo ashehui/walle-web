@@ -90,6 +90,7 @@ class TaskController extends Controller {
                 $task->user_id = $this->uid;
                 $task->project_id = $projectId;
                 $task->status = $status;
+                $task->file_list = implode("\n", (array)$task->file_list);
                 if ($task->save()) {
                     return $this->redirect('@web/task/');
                 }

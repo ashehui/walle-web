@@ -36,6 +36,9 @@ $userName =  \Yii::$app->user->id ? $user->getName() : '';
     <link rel="stylesheet" href="<?= Url::to('@web/dist/css/ace-ie.min.css') ?>" />
     <![endif]-->
 
+    <link rel="stylesheet" href="<?= Url::to('@web/dist/css/datatables.min.css') ?>" />
+    <link rel="stylesheet" href="<?= Url::to('@web/dist/css/datatables.bootstrap.min.css') ?>" />
+
     <!--[if !IE]> -->
     <script type="text/javascript">
         window.jQuery || document.write("<script src='<?= Url::to('@web/dist/js/jquery-2.0.3.min.js') ?>'>"+"<"+"/script>");
@@ -57,6 +60,9 @@ $userName =  \Yii::$app->user->id ? $user->getName() : '';
     <script src="<?= Url::to('@web/dist/js/html5shiv.js') ?>"></script>
     <script src="<?= Url::to('@web/dist/js/respond.min.js') ?>"></script>
     <![endif]-->
+
+    <script src="<?= Url::to('@web/dist/js/datatables.min.js') ?>"></script>
+    <?php $this->head() ?>
 </head>
 
 <body>

@@ -113,7 +113,7 @@ class Git extends Command {
         $destination = Project::getDeployFromDir();
         $this->updateRepo($branch, $destination);
         $cmd[] = sprintf('cd %s ', $destination);
-        $cmd[] = '/usr/bin/env git log -' . $count . ' --pretty="%h - %an %s" ';
+        $cmd[] = '/usr/bin/env git log -' . $count . ' --pretty="%h_%s → %an" ';
         $command = join(' && ', $cmd);
         $result = $this->runLocalCommand($command);
         if (!$result) {
@@ -125,7 +125,11 @@ class Git extends Command {
         $log = htmlspecialchars(GlobalHelper::convert2Utf8($this->getExeLog()));
         $list = explode(PHP_EOL, $log);
         foreach ($list as $item) {
-            $commitId = substr($item, 0, strpos($item, '-') - 1);
+            if (preg_match('~^([A-Fa-f0-9]+)~', $item, $matches)) {
+                $commitId = $matches[1];
+            } else {
+                $commitId = item;
+            }
             $history[] = [
                 'id'      => $commitId,
                 'message' => $item,
@@ -160,6 +164,44 @@ class Git extends Command {
             ];
         }
         return $history;
+    }
+
+
+    /**
+     * 获取两个版本的差异
+     *
+     * @ return array
+     */
+
+    public function getVersionDiff($old, $new) {
+        $destination = Project::getDeployFromDir();
+        $cmd[] = sprintf('cd %s ', $destination);
+        $cmd[] = sprintf('/usr/bin/env git reset -q --hard %s', $new);
+        $cmd[] = sprintf('/usr/bin/env git diff %s %s --name-status', $old, $new);
+        $command = implode(' && ', $cmd);
+        $result = $this->runLocalCommand($command);
+
+        $output = explode(PHP_EOL, $this->getExeLog());
+        $diff = [];
+        $excludes = GlobalHelper::str2arr($this->config->excludes);
+        array_push($excludes, '*.git*');
+        array_push($excludes, '.svn*');
+        array_walk($excludes, function(&$item) {
+            $item = '~^([A-Z])\s+'.str_replace('\*', '.*', preg_quote($item)).'~Ui';
+        });
+
+        foreach($output as $line) {
+            if (!preg_filter($excludes, 'exclude', $line) && preg_match('~^([A-Z])\s+(\S+)$~', $line, $match)) {
+                if ($file = realpath("$destination/{$match[2]}")) {
+                    $diff[$file] = [
+                        'status' => $match[1],
+                        'file' => $file,
+                    ];
+                }
+            }
+        }
+
+        return $diff;
     }
     
 }

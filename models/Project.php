@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\components\Folder;
+use app\components\Repo;
 use app\components\GlobalHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -346,5 +347,38 @@ class Project extends \yii\db\ActiveRecord
         // 删除本地目录
 
     }
+
+    public function getFiles($commitId = '', $parentDir = '') {
+        $filesOnChange = [];
+        if ($lastTask = Task::find()->where(['project_id'=>$this->id, 'file_transmission_mode'=>1])->orderBy('id DESC')->one()) {
+            $lastDeployCommitId = $lastTask->commit_id;
+            $filesOnChange = Repo::getRevision($this)->getVersionDiff($lastDeployCommitId, $commitId); 
+        }
+
+        array_walk($filesOnChange, function (&$item) {
+           $item['selected'] = true;
+        });
+
+        /*
+        $files = (new Folder($this))->getFiles($parentDir); 
+        array_walk($files, function (&$item) {
+           $item['selected'] = false;
+        });
+
+        $files = array_merge($files, $filesOnChange);
+        */
+
+        $files = $filesOnChange;
+
+        $rootPath = $this->getDeployFromDir();
+
+        foreach($files as &$item) {
+            $item['type'] = is_file($item['file']) ? 'f' : 'd';
+            $item['file'] = str_replace($rootPath.'/', '', $item['file']);
+        }
+
+        return array_values($files);
+    }
+
 
 }

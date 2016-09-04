@@ -40,6 +40,7 @@ use yii\helpers\Url;
                 <th><?= yii::t('task', 'l_time') ?></th>
                 <th><?= yii::t('task', 'l_branch') ?></th>
                 <th><?= yii::t('task', 'l_commit') ?></th>
+                <th><?= yii::t('task', '上线方式') ?></th>
                 <th><?= yii::t('task', 'l_status') ?></th>
                 <th><?= yii::t('task', 'l_opera') ?></th>
             </tr>
@@ -53,6 +54,7 @@ use yii\helpers\Url;
                 <td><?= $item['updated_at'] ?></td>
                 <td><?= $item['branch'] ?></td>
                 <td><?= $item['commit_id'] ?></td>
+                <td><?= $item['file_transmission_mode'] ?></td>
                 <td class="<?= \Yii::t('w', 'task_status_' . $item['status'] . '_color') ?>">
                     <?= \Yii::t('w', 'task_status_' . $item['status']) ?></td>
                 <td>

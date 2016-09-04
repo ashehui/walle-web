@@ -84,11 +84,13 @@ class Command {
      * @param integer $delay 每台机器延迟执行post_release任务间隔, 不推荐使用, 仅当业务无法平滑重启时使用
      * @return bool
      */
-    final public function runRemoteCommand($command, $delay = 0) {
+    final public function runRemoteCommand($command, $delay = 0, $host = []) {
         $this->log = '';
         $needTTY = '-T';
 
-        foreach (GlobalHelper::str2arr($this->getConfig()->hosts) as $remoteHost) {
+        $hosts = !empty($host) ? (array)$host : GlobalHelper::str2arr($this->getConfig()->hosts);
+
+        foreach ($hosts as $remoteHost) {
 
             $localCommand = sprintf('ssh %s -p %d -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o CheckHostIP=false %s@%s %s',
                 $needTTY,

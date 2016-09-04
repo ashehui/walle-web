@@ -12,27 +12,19 @@ use yii\web\AssetBundle;
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @since 2.0
  */
-class AppAsset extends AssetBundle
+class DataTableAsset extends AssetBundle
 {
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-        '/dist/css/diff.css',
-        '/dist/css/site.css',
+        '/dist/css/datatables.min.css',
+        '/dist/css/datatables.bootstrap.min.css'
     ];
-
     public $js = [
-        '/dist/js/app.js',
-        '/dist/js/ace-extra.min.js'
+        '/dist/js/datatables.min.js'
     ];
-
-    public $jsOptions = [
-        'position' => \yii\web\View::POS_HEAD,
-    ];
-
     public $depends = [
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
-        'app\assets\DataTableAsset',
     ];
 }

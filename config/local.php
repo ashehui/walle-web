@@ -37,9 +37,5 @@ return [
             'cookieValidationKey' => 'PdXWDAfV5-gPJJWRar5sEN71DN0JcDRV',
         ],
     ],
-<<<<<<< HEAD
-    'language'   => 'zh-CN', // zh => 中文,  en => English
-=======
     'language'   => isset($_ENV['WALLE_LANGUAGE']) ? $_ENV['WALLE_LANGUAGE'] : 'zh-CN', // zh-CN => 中文,  en => English
->>>>>>> 4d6d8e731f93583bd2251671388ff5b4021fcace
 ];

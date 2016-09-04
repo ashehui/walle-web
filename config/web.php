@@ -1,6 +1,7 @@
 <?php
 $config = [
     'id' => 'basic',
+    'name' => '代码发布系统',
     'timeZone'   => 'Asia/Shanghai',
     'basePath'   => dirname(__DIR__),
     'extensions' => require(__DIR__ . '/../vendor/yiisoft/extensions.php'),
@@ -9,9 +10,9 @@ $config = [
     'components' => [
 		'db' => [
             'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=127.0.0.1;dbname=walle-web',
+            'dsn' => 'mysql:host=127.0.0.1;dbname=walle',
             'username' => 'root',
-            'password' => '',
+            'password' => '880816',
             'charset' => 'utf8'
         ],
         'session' => [
@@ -57,6 +58,32 @@ $config = [
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
             ],
         ],
+        'view' => [
+            'theme' => [
+                'pathMap' => [
+                    '@app/views' => '@app/themes/adminlte'
+                ],  
+            ],  
+        ],  
+        'assetManager' => [
+            'appendTimestamp' => false,
+            'bundles' => [
+                'dmstr\web\AdminLteAsset' => [
+                    'skin' => 'skin-blue',
+                    //'skin' => 'skin-black',
+                    //'skin' => 'skin-red',
+                    //'skin' => 'skin-yellow',
+                    //'skin' => 'skin-purple',
+                    //'skin' => 'skin-green',
+                    //'skin' => 'skin-blue-light',
+                    //'skin' => 'skin-black-light',
+                    //'skin' => 'skin-red-light',
+                    //'skin' => 'skin-yellow-light',
+                    //'skin' => 'skin-purple-light',
+                    //'skin' => 'skin-green-light',
+                ],  
+            ]   
+        ],  
     ],
     'bootstrap'  => [
         'app\components\EventBootstrap',
