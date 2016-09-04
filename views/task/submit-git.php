@@ -138,13 +138,9 @@ use app\models\Task;
 
 <?php
 $this->registerJs(<<<JS
-
-
     jQuery(function($) {
-
             var showFile = [];
-
-            dt = $('#diff-view').DataTable({
+            var dt = $('#diff-view').DataTable({
                 scrollY : "400px",
                 scrollCollapse: true,
                 paging: false,
@@ -219,7 +215,7 @@ $this->registerJs(<<<JS
         $('#file-list tbody').on( 'click', 'tr td a.dir-open', function () {
             var tr = $(this).closest('tr');
             var row = dt.row( tr );
-            $.get('/project/filelist?projectId=8&dir='+row.data().file, function(data){
+            $.get('/project/filelist?projectId={$_GET['projectId']}&dir='+row.data().file, function(data){
                 $.each(data.data, function(index, item){
                     idx = $.inArray(item.file, showFile);
                     if (idx === -1) {
@@ -248,7 +244,6 @@ $this->registerJs(<<<JS
                     idx_b = 0,
                     idx_c = 0;
 
-
                 $.each(data, function(i, section) {
                     $.each(section, function(j, item) {
                         idx_b = item.base.offset;
@@ -261,15 +256,17 @@ $this->registerJs(<<<JS
                                 _row['class'] = cssClass;
                                 _row['idx_b'] = ++ idx_b;
                                 _row['b'] = '<' + tag + '>' + line + '</' + tag + '>';
-                                if (item.changed.lines[k]) {
+                                if (item.changed.lines.length > 0) {
                                     _row['idx_c'] = ++ idx_c;
-                                    _row['c'] = '<' + tag + '>' + item.changed.lines[k] + '</' + tag + '>';
+                                    _row['c'] = '<' + tag + '>' + item.changed.lines.pop() + '</' + tag + '>';
                                 } else {
                                     _row['c'] = '';
+                                    _row['idx_c'] = '';
                                 }
                                 tableData.push(_row);
                             });
-                        } else {
+                        }
+                        if (item.changed.lines.length > 0){
                             $.each(item.changed.lines, function(k, line) {
                                 var _row = [];
                                 _row['class'] = cssClass;
@@ -302,7 +299,7 @@ $this->registerJs(<<<JS
         var pre_branch = ace.cookie.get(branch_name);
         if (pre_branch) {
             var option = '<option value="' + pre_branch + '" selected>' + pre_branch + '</option>';
-            $('#branch').html(option)
+            $('#branch').html(option);
         }
 
         function getBranchList() {
@@ -348,13 +345,13 @@ $this->registerJs(<<<JS
 
                 getFileList();
                 
-                $('#task-title').val($('#task-commit_id').val());
+                $('#task-title').val($('#task-commit_id').find('option:selected').text());
             });
         }
 
         function getFileList() {
             var commitId = $('#task-commit_id').val();
-            $.get("/project/filelist?projectId=8&commitId=" + commitId, function(data){
+            $.get("/project/filelist?projectId={$_GET['projectId']}&commitId=" + commitId, function(data){
                 $('#file-list').dataTable().fnClearTable();
                 if (data.data.length > 0) {
                     $('#file-list').dataTable().fnAddData(data.data);
@@ -371,7 +368,7 @@ $this->registerJs(<<<JS
 
         $('#task-commit_id').change(function(){
             getFileList();
-            $('#task-title').val($(this).val());
+            $('#task-title').val($(this).find('option:selected').text());
         });
 
         // 页面加载完默认拉取master的commit log
