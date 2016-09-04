@@ -17,7 +17,7 @@ use app\models\Task;
         <?php if ($conf->repo_mode == Project::REPO_MODE_BRANCH) { ?>
           <div class="form-group">
               <label><?= yii::t('task', 'select branches') ?>
-                  <a class="show-tip icon-refresh green" href="javascript:;"></a>
+                  <a class="show-tip icon-refresh green" href="javascript:;">刷新分支</a>
                   <span class="tip"><?= yii::t('task', 'all branches') ?></span>
                   <i class="get-branch icon-spinner icon-spin orange bigger-125" style="display: none"></i>
               </label>
