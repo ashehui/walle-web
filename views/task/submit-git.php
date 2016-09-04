@@ -68,7 +68,7 @@ use app\models\Task;
                   ['class' => 'control-label bolder blue', 'style' => 'display: none']) ?>
           <!-- 文件列表 end -->
 */ ?>
-      <div class="col-md-6">
+      <div class="col-lg-5">
       <table id="file-list" class="table table-striped table-bordered" cellspacing="0" style="width:99%">
         <thead>
             <tr>
@@ -80,7 +80,7 @@ use app\models\Task;
         </thead>
       </table>
     </div>
-    <div class="col-md-6">
+    <div class="col-lg-7">
       <table id="diff-view" class="table table-striped table-bordered DifferencesSideBySide" cellspacing="0" style="width:99%">
         <thead>
             <tr>
@@ -129,9 +129,7 @@ use app\models\Task;
     <!-- 错误提示-->
 
     <?php ActiveForm::end(); ?>
-
 </div>
-
 
 <?php
 $this->registerJs(<<<JS
@@ -255,7 +253,7 @@ $this->registerJs(<<<JS
                                 _row['b'] = '<' + tag + '>' + line + '</' + tag + '>';
                                 if (item.changed.lines.length > 0) {
                                     _row['idx_c'] = ++ idx_c;
-                                    _row['c'] = '<' + tag + '>' + item.changed.lines.pop() + '</' + tag + '>';
+                                    _row['c'] = '<' + tag + '>' + item.changed.lines.shift() + '</' + tag + '>';
                                 } else {
                                     _row['c'] = '';
                                     _row['idx_c'] = '';
@@ -267,7 +265,7 @@ $this->registerJs(<<<JS
                             $.each(item.changed.lines, function(k, line) {
                                 var _row = [];
                                 _row['class'] = cssClass;
-                                _row['idx_b'] = ++ idx_b;
+                                _row['idx_b'] = '';
                                 _row['b'] = '';
                                 _row['idx_c'] = ++ idx_c;
                                 _row['c'] = '<' + tag + '>' + line + '</' + tag + '>';
@@ -405,10 +403,10 @@ $this->registerJs(<<<JS
 
         // 切换显示文件列表
         $('body').on('click', '#transmission-full-ctl', function() {
-            $('#file-list').hide();
+            //$('#file-list').hide();
             //$('label[for="task-file-list"]').hide();
         }).on('click', '#transmission-part-ctl', function() {
-            $('#file-list').show();
+            //$('#file-list').show();
             //$('label[for="task-file-list"]').show();
         });
 
